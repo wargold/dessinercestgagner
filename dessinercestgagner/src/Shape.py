@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 from ripser import ripser
 from persim import plot_diagrams
 from dessinercestgagner.src import stableRANK as sr
+import os
+dir = os.path.dirname(__file__)
+filename = os.path.join(dir, '/relative/path/to/file/you/want')
 
 
 class Shape:
@@ -15,8 +18,10 @@ class Shape:
         :param object_type: String, Object in the data folder
         '''
         self.object_type = object_type
+        dir = os.path.dirname(__file__)
+        print(os.path.join(dir, '../../dessinercestgagner/data/Shapes/' + object_type + '-' + str(i) + '.json'))
         self.points = np.array([list(it.values()) for it in
-                                json.load(open('./dessinercestgagner/data/Shapes/' + object_type + '-' + str(i) + '.json'))['points']
+                                json.load(open(os.path.join(dir, '../../dessinercestgagner/data/Shapes/' + object_type + '-' + str(i) + '.json')))['points']
                                 ])
 
     def perturb(self, magn = 0.01):
