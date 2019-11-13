@@ -7,7 +7,6 @@ from persim import plot_diagrams
 from dessinercestgagner.src import stableRANK as sr
 import os
 dir = os.path.dirname(__file__)
-filename = os.path.join(dir, '/relative/path/to/file/you/want')
 
 
 class Shape:
@@ -19,20 +18,33 @@ class Shape:
         '''
         self.object_type = object_type
         dir = os.path.dirname(__file__)
-        print(os.path.join(dir, '../../dessinercestgagner/data/Shapes/' + object_type + '-' + str(i) + '.json'))
         self.points = np.array([list(it.values()) for it in
                                 json.load(open(os.path.join(dir, '../../dessinercestgagner/data/Shapes/' + object_type + '-' + str(i) + '.json')))['points']
                                 ])
 
-    def perturb(self, magn = 0.01):
+    def perturb(self, method = 'move', magn = 0.01):
         '''
-        Modify points coordinates with U([-magn, magn])/2
+        Method = 'move', modify points coordinates with U([-magn, magn])/2
+        Method = 'noise', add some points with probability magn
         :param magn: float, magnitude of the modification
+        :param method: str , in ('move', 'noise')
         :return: New Shape modified
         '''
         pert = copy.copy(self)
-        pert.points = pert.points + magn * ( np.random.rand(*self.points.shape) - 0.5 )
+        if method == 'move':
+            pert.points = pert.points + magn * ( np.random.rand(*self.points.shape) - 0.5 )
+        if method == 'noise':
+            pert.points = np.append(pert.points, np.random.rand(int(self.points.shape[0]*magn), 2), axis = 0)
         return pert
+
+    def extend(self, n = 10, magn = 0.01):
+        '''
+        Perturbate the shape with random modification, return a list of n of those perturbations
+        :param n: number of shapes returned
+        :param magn: magnitude of the modification
+        :return: list(Shape), original shape modified
+        '''
+        return [self.perturb(magn) for _ in range(n)]
 
     def render(self):
         '''
@@ -43,12 +55,27 @@ class Shape:
         plt.show()
         return
 
-    def plot_barcode(self):
+    def plot_diagram(self):
         '''
-        Plot barcode of the shape
+        Plot birth-death diagram of the shape components (persistence diagram)
         :return: ax object
         '''
         diagrams = ripser(self.points)['dgms']
         return plot_diagrams(diagrams, show=True)
+
+    def plot_barcode(self):
+        '''
+        Plot barcode of the shape
+        :return:
+        '''
+
+
+if __name__ == "__main__":
+    original_shape = Shape('apple').perturb(method = 'noise', magn = 0.05)
+    shapes = original_shape.extend()
+    for shape in shapes:
+        shape.render()
+        # shape.get_profile().display()
+        shape.plot_diagram()
 
 
