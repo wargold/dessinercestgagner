@@ -17,7 +17,7 @@ Example is provided in classifier.py
 ### Guess_figure
 H1/H0 signature of the object superposed with the mean signature of the three types.
 File names are constructed as follow:
-      {shape type e.g. 'apple'}_{Shape number e.g. 1,2,3}_{Classification result e.g. 'bell'}.pdf
+     //{shape type e.g. 'apple'}_{Shape number e.g. 1,2,3}_{Classification result e.g. 'bell'}.pdf
 ### signature_mean
 All the normalized H1/H0 signatures and the mean of these
 
