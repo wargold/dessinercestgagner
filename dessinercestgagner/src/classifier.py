@@ -12,9 +12,10 @@ import scipy.integrate as integrate
 output_dir = os.path.join(os.path.dirname(__file__), '../../output/')
 plt.style.use('ggplot')
 
-method = 'noise'
-list_of_objects = ['apple', 'bat', 'bell']  # , 'bird'
-colours_shape = {'apple': 'g', 'bat': 'k', 'bell': 'y'}
+homology = 'H1/H0' # can be changed to H0 or H1
+method = 'move'
+list_of_objects = ['apple', 'bat', 'bell', 'bone']  # , 'bird'
+colours_shape = {'apple': 'g', 'bat': 'k', 'bell': 'y','bone':'y'}
 size_of_object = 21
 perturb_magn = 0.3
 perturb_number = 10
@@ -138,7 +139,7 @@ if __name__ == '__main__':
     noise_levels = []
     error_rates = []
     result = {}
-    for perturb_magn in np.arange(0,0.2,0.02):
+    for perturb_magn in np.arange(0,0.3,0.04):
         print(perturb_magn)
         print(time.time() - start)
         sample_shapes = {(k, y, i): sr.euc_object(Shape(k, y).perturb(method, perturb_magn).points) for k in list_of_objects
@@ -152,11 +153,10 @@ if __name__ == '__main__':
         print('Signatures computed')
         print(time.time()-start)
         output = False
-        file.write('test')
         res = predict(signatures, homology = 'H1/H0', output = output)
         result[perturb_magn] = res
         noise_levels.append(perturb_magn)
-        error_rates.append(float(600 - sum(res[shape_type][shape_type] for shape_type in list_of_objects))/600.0)
+        error_rates.append(float(800 - sum(res[shape_type][shape_type] for shape_type in list_of_objects))/600.0)
         del sample_shapes
         del signatures
         print(error_rates)
