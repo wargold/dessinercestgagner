@@ -7,11 +7,12 @@ from persim import plot_diagrams
 from dessinercestgagner.src import stableRANK as sr
 import os
 dir = os.path.dirname(__file__)
+output_dir = os.path.join(os.path.dirname(__file__), '../../output/')
 
 
 class Shape:
 
-    def __init__(self, object_type, i : int = 1):
+    def __init__(self, object_type, i : int = 1, nb_points = 100):
         '''
         Fetch the ith shape of object_type from json files
         :param object_type: String, Object in the data folder
@@ -21,6 +22,9 @@ class Shape:
         self.points = np.array([list(it.values()) for it in
                                 json.load(open(os.path.join(dir, '../../dessinercestgagner/data/Shapes/' + object_type + '-' + str(i) + '.json')))['points']
                                 ])
+        self.points = self.points[np.random.choice(np.arange(0,len(self.points),1),nb_points),:]
+        self.method = 'None'
+        self.perturb_magn = 0
 
     def perturb(self, method = 'move', magn = 0.01):
         '''
@@ -31,6 +35,8 @@ class Shape:
         :return: New Shape modified
         '''
         pert = copy.copy(self)
+        pert.method = method
+        pert.perturb_magn = magn
         if method == 'move':
             pert.points = np.clip(pert.points + magn * ( np.random.rand(*self.points.shape) - 0.5 ), 0, 1)
         if method == 'noise':
@@ -46,12 +52,16 @@ class Shape:
         '''
         return [self.perturb(magn) for _ in range(n)]
 
-    def render(self):
+    def render(self, save = False):
         '''
         Draw a matplotlib figure of the object
         :return: None
         '''
+        plt.figure(figsize=(10,10))
         plt.plot(self.points[:,0], self.points[:,1],'+')
+        plt.title(self.object_type + ' perturbation: ' + self.method + ' ' + str(self.perturb_magn))
+        if save == True:
+            plt.savefig(output_dir + 'objects/' + self.object_type + '_' + str(self.perturb_magn) + '.pdf')
         plt.show()
         return
 

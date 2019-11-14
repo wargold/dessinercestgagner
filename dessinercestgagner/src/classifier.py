@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import time
 plt.style.use('ggplot')
 inf = float("inf")
+import scipy.integrate as integrate
 output_dir = os.path.join(os.path.dirname(__file__), '../../output/')
 plt.style.use('ggplot')
 
@@ -70,10 +71,7 @@ def get_signatures(sample_shapes):
     return  signatures
 
 def Average_pcf(pcf_array, title, color, plot = False):
-    a = 0
-    for pcf in pcf_array:
-        a += pcf
-    a = a * (1 / len(pcf_array))
+    a = sum(pcf_array) * (1 / len(pcf_array))
     if plot == True:
         plt.figure(figsize=(10, 10))
         border = 1
@@ -90,7 +88,7 @@ def guess(nom, data_Type, types_mean, output):
     i = 0
     for pcf in nom:
         for type_name in types_mean.keys():
-            d[type_name] = abs(pcf - types_mean[type_name]).integrate(0, 2)
+            d[type_name] = integrate.quad(lambda x: abs(pcf.evaluate(x) - types_mean[type_name].evaluate(x)),0,1,limit=100)
         closest = min(d.items(), key=operator.itemgetter(1))[0]
         if output == True:
             plt.figure(figsize=(20,20))
@@ -112,6 +110,7 @@ def predict(signatures, homology, output = False):
     for object in list_of_objects:
         print(object)
         result[object] = guess(signatures[object][homology], object, means, output)
+    print(result)
     return result
 
 
@@ -127,25 +126,44 @@ def print_mean(normalized_sig_array, shape_name, colour):
     plt.close()
     return
 
+def plot_result_noise(noise_levels, error_rates):
+    plt.figure(figsize=(10,10))
+    plt.plot(noise_levels, error_rates)
+    plt.title('Classification error rate with "' + method + '" perturbation')
+    plt.savefig(output_dir + 'classification_error_rate_' + method + '.pdf')
+    plt.show()
+
 if __name__ == '__main__':
-    file = open(output_dir + 'result.txt', mode = 'w')
+    file = open(output_dir + 'result.json', mode = 'w')
     start = time.time()
-    for perturb_magn in np.arange(0,0.5,0.1):
+    noise_levels = []
+    error_rates = []
+    result = {}
+    for perturb_magn in np.arange(0,0.2,0.02):
         print(perturb_magn)
         print(time.time() - start)
         sample_shapes = {(k, y, i): sr.euc_object(Shape(k, y).perturb(method, perturb_magn).points) for k in list_of_objects
                                                                                              for y in range(1, size_of_object)                                                                    for i in range(perturb_number)
                      }
+        for object in list_of_objects:
+            Shape(object, 1).perturb(method, perturb_magn).render(save=True)
         print('Shapes created')
         print(time.time() - start)
         signatures = get_signatures(sample_shapes)
         print('Signatures computed')
         print(time.time()-start)
         output = False
-        file.write(str(predict(signatures, homology = 'H1/H0', output = output)))
+        file.write('test')
+        res = predict(signatures, homology = 'H1/H0', output = output)
+        result[perturb_magn] = res
+        noise_levels.append(perturb_magn)
+        error_rates.append(float(600 - sum(res[shape_type][shape_type] for shape_type in list_of_objects))/600.0)
         del sample_shapes
         del signatures
-
+        print(error_rates)
+    file.write(result)
+    plot_result_noise(noise_levels,error_rates)
+    file.close()
     # Print mean and profile H1/H0
     # for object in list_of_objects:
     #     print_mean(object, 'b')
