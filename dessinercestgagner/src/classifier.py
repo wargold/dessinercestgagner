@@ -1,18 +1,18 @@
 import dessinercestgagner.src.stableRANK as sr
 import numpy as np
-from dessinercestgagner.src.Shape import Shape
 import operator
 import os
 import midict
 import matplotlib.pyplot as plt
 import time
+from dessinercestgagner.src.Shape import Shape as Shape
 plt.style.use('ggplot')
 inf = float("inf")
 import scipy.integrate as integrate
 output_dir = os.path.join(os.path.dirname(__file__), '../../output/')
 plt.style.use('ggplot')
 
-method = 'move'
+method = 'noise'
 list_of_objects = ['apple', 'bat', 'bell']  # , 'bird'
 colours_shape = {'apple': 'g', 'bat': 'k', 'bell': 'y'}
 size_of_object = 21
@@ -31,7 +31,6 @@ temp = None
 contours = {"H0": [[[0], [1]], ("area", inf, inf)]}
 border = 1
 linewidth = 1.0
-i = 0
 
 
 def plot_signatures(signature_array, homology, title, colour):
@@ -134,7 +133,7 @@ def plot_result_noise(noise_levels, error_rates):
     plt.show()
 
 if __name__ == '__main__':
-    file = open(output_dir + 'result.json', mode = 'w')
+    file = open(output_dir + 'result_' + method + '.json', mode = 'w')
     start = time.time()
     noise_levels = []
     error_rates = []
@@ -161,7 +160,7 @@ if __name__ == '__main__':
         del sample_shapes
         del signatures
         print(error_rates)
-    file.write(result)
+    file.write(str(result))
     plot_result_noise(noise_levels,error_rates)
     file.close()
     # Print mean and profile H1/H0

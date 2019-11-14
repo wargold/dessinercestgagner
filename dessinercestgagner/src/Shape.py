@@ -40,7 +40,7 @@ class Shape:
         if method == 'move':
             pert.points = np.clip(pert.points + magn * ( np.random.rand(*self.points.shape) - 0.5 ), 0, 1)
         if method == 'noise':
-            pert.points = np.append(pert.points, np.random.rand(int(self.points.shape[0]*magn), 2), axis = 0)
+            pert.points = np.append(pert.points, np.random.rand(int(self.points.shape[0]*magn*10), 2), axis = 0)
         return pert
 
     def extend(self, n = 10, magn = 0.01):
@@ -61,7 +61,7 @@ class Shape:
         plt.plot(self.points[:,0], self.points[:,1],'+')
         plt.title(self.object_type + ' perturbation: ' + self.method + ' ' + str(self.perturb_magn))
         if save == True:
-            plt.savefig(output_dir + 'objects/' + self.object_type + '_' + str(self.perturb_magn) + '.pdf')
+            plt.savefig(output_dir + 'objects/' + self.object_type + '_' + self.method + '_' + str(self.perturb_magn) + '.pdf')
         plt.show()
         return
 
