@@ -13,7 +13,7 @@ Example is provided in classifier.py
 ## Output
 ### Objects
 2D-representation of the objects to be classified, names are constructed as follow:
-* {shape type e.g. 'apple'}_{Transformation type e.g. 'move'}_{modification magnitude e.g. 0.1}.pdf
+* {shape type e.g. 'apple'}/_{Transformation type e.g. 'move'}_{modification magnitude e.g. 0.1}.pdf
 ### Guess_figure
 H1/H0 signature of the object superposed with the mean signature of the three types.
 File names are constructed as follow:
