@@ -32,7 +32,7 @@ class Shape:
         '''
         pert = copy.copy(self)
         if method == 'move':
-            pert.points = pert.points + magn * ( np.random.rand(*self.points.shape) - 0.5 )
+            pert.points = np.clip(pert.points + magn * ( np.random.rand(*self.points.shape) - 0.5 ), 0, 1)
         if method == 'noise':
             pert.points = np.append(pert.points, np.random.rand(int(self.points.shape[0]*magn), 2), axis = 0)
         return pert

@@ -5,9 +5,10 @@ import operator
 import os
 import midict
 import matplotlib.pyplot as plt
+import time
 plt.style.use('ggplot')
 inf = float("inf")
-graph_dir = os.path.join(os.path.dirname(__file__), '../../output/')
+output_dir = os.path.join(os.path.dirname(__file__), '../../output/')
 plt.style.use('ggplot')
 
 method = 'move'
@@ -83,13 +84,13 @@ def Average_pcf(pcf_array, title, color, plot = False):
     return a
 
 
-def correct_guesses(nom, data_Type, types_mean, output):
+def guess(nom, data_Type, types_mean, output):
     d = {}
     res = {fig_type: 0 for fig_type in types_mean.keys()}
     i = 0
     for pcf in nom:
         for type_name in types_mean.keys():
-            d[type_name] = abs(pcf - types_mean[type_name]).integrate(0, 100)
+            d[type_name] = abs(pcf - types_mean[type_name]).integrate(0, 2)
         closest = min(d.items(), key=operator.itemgetter(1))[0]
         if output == True:
             plt.figure(figsize=(20,20))
@@ -97,7 +98,7 @@ def correct_guesses(nom, data_Type, types_mean, output):
             for type_name in types_mean.keys():
                 types_mean[type_name].plot(1, color = colours_shape[type_name], linewidth = 3)
             plt.title('real type:' + data_Type + ' guessed type:' + closest)
-            plt.savefig(graph_dir + 'guess_figure/' + data_Type + '_' + str(i) + '_' + closest + '.pdf')
+            plt.savefig(output_dir + 'guess_figure/' + data_Type + '_' + str(i) + '_' + closest + '.pdf')
             plt.show()
             plt.close()
         res[closest] = res[closest] + 1
@@ -105,10 +106,13 @@ def correct_guesses(nom, data_Type, types_mean, output):
 
 def predict(signatures, homology, output = False):
     means = {}
+    result = {}
     for object in list_of_objects:
         means[object] = Average_pcf(signatures[object][homology], object, colours_shape[object])
     for object in list_of_objects:
-        print(correct_guesses(signatures[object][homology], object, means, output))
+        print(object)
+        result[object] = guess(signatures[object][homology], object, means, output)
+    return result
 
 
 def print_mean(normalized_sig_array, shape_name, colour):
@@ -118,21 +122,30 @@ def print_mean(normalized_sig_array, shape_name, colour):
         k.plot(border, colour, linewidth)
     shape_mean.plot(border, 'y', linewidth + 10)
     plt.title("Signature of " + shape_name + ", normalized homology")
-    plt.savefig(graph_dir + 'signature_mean/' +shape_name + '_normalized_homology.pdf')
+    plt.savefig(output_dir + 'signature_mean/' + shape_name + '_normalized_homology.pdf')
     plt.show()
     plt.close()
     return
 
-for perturb_magn in np.arange(0,0.5,0.1):
-    print(perturb_magn)
-    sample_shapes = {(k, y, i): sr.euc_object(Shape(k, y).perturb(method, perturb_magn).points) for k in list_of_objects
-                                                                                         for y in range(1, size_of_object)
-                                                                                         for i in range(perturb_number)
-                 }
-    signatures = get_signatures(sample_shapes)
-    output = False
-    predict(signatures, homology = 'H1/H0', output = output)
+if __name__ == '__main__':
+    file = open(output_dir + 'result.txt', mode = 'w')
+    start = time.time()
+    for perturb_magn in np.arange(0,0.5,0.1):
+        print(perturb_magn)
+        print(time.time() - start)
+        sample_shapes = {(k, y, i): sr.euc_object(Shape(k, y).perturb(method, perturb_magn).points) for k in list_of_objects
+                                                                                             for y in range(1, size_of_object)                                                                    for i in range(perturb_number)
+                     }
+        print('Shapes created')
+        print(time.time() - start)
+        signatures = get_signatures(sample_shapes)
+        print('Signatures computed')
+        print(time.time()-start)
+        output = False
+        file.write(str(predict(signatures, homology = 'H1/H0', output = output)))
+        del sample_shapes
+        del signatures
 
-# Print mean and profile H1/H0
-# for object in list_of_objects:
-#     print_mean(object, 'b')
+    # Print mean and profile H1/H0
+    # for object in list_of_objects:
+    #     print_mean(object, 'b')

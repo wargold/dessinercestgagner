@@ -117,9 +117,8 @@ class pcf_max(object):
             beg=e  
             end=b 
             coef=-1
-        while l+1<len(self.dom_indices(beg,end)):
-            integral+=(self.dom_indices(beg,end)[l+1]-self.dom_indices(beg,end)[l])*self.evaluate(self.dom_indices(beg,end)[l])
-            l+=1
+        temp = self.dom_indices(beg, end)
+        integral = sum((temp[l+1]-temp[l])*self.evaluate(temp[l]) for l in range(len(temp) - 1))
         return coef*integral
 
 
